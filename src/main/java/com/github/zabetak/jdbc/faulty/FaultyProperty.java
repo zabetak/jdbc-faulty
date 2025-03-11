@@ -17,6 +17,7 @@
 package com.github.zabetak.jdbc.faulty;
 
 public enum FaultyProperty {
+  RANDOM_SEED("random.seed", "13"),
   FAILURE_PERCENTAGE("failure.percentage", "0.5"),
   FAILURE_METHOD("failure.method", "commit");
   final String propertyName;

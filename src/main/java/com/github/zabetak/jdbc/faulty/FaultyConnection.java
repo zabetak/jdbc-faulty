@@ -24,7 +24,7 @@ import java.util.Random;
 
 public class FaultyConnection implements InvocationHandler {
   private final Connection realConnection;
-  private final Random random = new Random();
+  private final Random random = new Random(Long.parseLong(FaultyProperty.RANDOM_SEED.value()));
   private final double failurePercentage;
   private final String failureMethod;
 
