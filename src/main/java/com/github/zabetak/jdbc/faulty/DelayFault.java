@@ -16,18 +16,36 @@
 ·*/
 package com.github.zabetak.jdbc.faulty;
 
-public enum FaultyProperty {
-  RANDOM_SEED("random.seed", "13"),
-  CONFIGURATION_LOCATION("configuration.location", "jdbc-faulty.properties");
-  final String propertyName;
-  final String defaultValue;
+import java.sql.SQLException;
+import java.util.Objects;
 
-  FaultyProperty(String s, String def) {
-    this.propertyName = s;
-    this.defaultValue = def;
+public class DelayFault extends Fault {
+  private final long delayMs;
+
+  public DelayFault(double rate, String method, long delayMs) {
+    super(rate, method);
+    this.delayMs = delayMs;
   }
 
-  String value() {
-    return System.getProperty("jdbc.faulty." + this.propertyName, this.defaultValue);
+  @Override
+  public void apply() throws SQLException {
+    try {
+      Thread.sleep(delayMs);
+    } catch (InterruptedException e) {
+      throw new SQLException("Interrupted while applying artificial delay.", e);
+    }
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == null || getClass() != o.getClass()) return false;
+    if (!super.equals(o)) return false;
+    DelayFault that = (DelayFault) o;
+    return delayMs == that.delayMs;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), delayMs);
   }
 }

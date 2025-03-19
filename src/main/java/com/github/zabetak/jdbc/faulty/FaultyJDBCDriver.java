@@ -16,21 +16,22 @@
 ·*/
 package com.github.zabetak.jdbc.faulty;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Proxy;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.DriverPropertyInfo;
-import java.sql.SQLException;
+import java.net.URL;
+import java.sql.*;
+import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 /**
- * A JDBC driver wrapper that proxies a real connection and generates exceptions/errors during
- * various stages.
+ * A JDBC driver wrapper that proxies a real connection and generates faults during various stages.
  */
 public class FaultyJDBCDriver implements Driver {
   private static final String JDBC_PREFIX = "jdbc:faulty:";
+  static final Map<String, Fault> FAULTS = new ConcurrentHashMap<>();
 
   static {
     try {
@@ -38,6 +39,7 @@ public class FaultyJDBCDriver implements Driver {
     } catch (SQLException e) {
       throw new RuntimeException("Failed to register " + FaultyJDBCDriver.class.getSimpleName(), e);
     }
+    loadFaultsFromClasspath("jdbc-faulty.properties");
   }
 
   @Override
@@ -86,5 +88,27 @@ public class FaultyJDBCDriver implements Driver {
   @Override
   public Logger getParentLogger() {
     return Logger.getLogger(FaultyJDBCDriver.class.getName());
+  }
+
+  public static void addFault(String name, Fault fault) {
+    FAULTS.put(name, fault);
+  }
+
+  public static void clearFaults() {
+    FAULTS.clear();
+  }
+
+  static void loadFaultsFromClasspath(String resourcePath) {
+    URL propertyFile = FaultyJDBCDriver.class.getClassLoader().getResource(resourcePath);
+    if (propertyFile != null) {
+      try (InputStream is = propertyFile.openStream()) {
+        Properties properties = new Properties();
+        properties.load(is);
+        FaultParser parser = new FaultPropertyParser(properties);
+        FAULTS.putAll(parser.parse());
+      } catch (IOException e) {
+        // Failed to open stream but not a big deal ignore
+      }
+    }
   }
 }

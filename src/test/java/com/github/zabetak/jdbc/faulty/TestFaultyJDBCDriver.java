@@ -16,18 +16,17 @@
 ·*/
 package com.github.zabetak.jdbc.faulty;
 
-public enum FaultyProperty {
-  RANDOM_SEED("random.seed", "13"),
-  CONFIGURATION_LOCATION("configuration.location", "jdbc-faulty.properties");
-  final String propertyName;
-  final String defaultValue;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-  FaultyProperty(String s, String def) {
-    this.propertyName = s;
-    this.defaultValue = def;
-  }
+public class TestFaultyJDBCDriver {
 
-  String value() {
-    return System.getProperty("jdbc.faulty." + this.propertyName, this.defaultValue);
+  @Test
+  void testLoadFaultsFromClassPath() {
+    FaultyJDBCDriver.clearFaults();
+    FaultyJDBCDriver.loadFaultsFromClasspath("jdbc-faulty-test-1.properties");
+    Assertions.assertEquals(new ExceptionFault(0.5, "commit"), FaultyJDBCDriver.FAULTS.get("f1"));
+    Assertions.assertEquals(
+        new DelayFault(0.01, "commit", 4000), FaultyJDBCDriver.FAULTS.get("f2"));
   }
 }

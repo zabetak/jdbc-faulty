@@ -19,26 +19,19 @@ package com.github.zabetak.jdbc.faulty;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Random;
 
 public class FaultyConnection implements InvocationHandler {
   private final Connection realConnection;
-  private final Random random = new Random(Long.parseLong(FaultyProperty.RANDOM_SEED.value()));
-  private final double failurePercentage;
-  private final String failureMethod;
 
   public FaultyConnection(Connection realConnection) {
     this.realConnection = realConnection;
-    this.failurePercentage = Double.parseDouble(FaultyProperty.FAILURE_PERCENTAGE.value());
-    this.failureMethod = FaultyProperty.FAILURE_METHOD.value();
   }
 
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-    if (failureMethod.equals(method.getName())) {
-      if (random.nextDouble() < failurePercentage) {
-        throw new SQLException("Randomly generated failure");
+    for (Fault fault : FaultyJDBCDriver.FAULTS.values()) {
+      if (fault.check(method)) {
+        fault.apply();
       }
     }
     return method.invoke(realConnection, args);

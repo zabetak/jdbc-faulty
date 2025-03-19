@@ -16,18 +16,9 @@
 ·*/
 package com.github.zabetak.jdbc.faulty;
 
-public enum FaultyProperty {
-  RANDOM_SEED("random.seed", "13"),
-  CONFIGURATION_LOCATION("configuration.location", "jdbc-faulty.properties");
-  final String propertyName;
-  final String defaultValue;
+import java.util.Map;
 
-  FaultyProperty(String s, String def) {
-    this.propertyName = s;
-    this.defaultValue = def;
-  }
+public interface FaultParser {
 
-  String value() {
-    return System.getProperty("jdbc.faulty." + this.propertyName, this.defaultValue);
-  }
+  Map<String, Fault> parse();
 }
