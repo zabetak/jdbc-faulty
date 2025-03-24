@@ -11,7 +11,7 @@ The JDBC driver can be found in [Maven central](https://central.sonatype.com/art
 <dependency>
     <groupId>com.github.zabetak</groupId>
     <artifactId>jdbc-faulty</artifactId>
-    <version>1.0</version>
+    <version>2.1</version>
 </dependency>
 ```
 
