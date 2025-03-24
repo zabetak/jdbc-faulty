@@ -16,29 +16,28 @@
 ·*/
 package com.github.zabetak.jdbc.faulty;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.lang.reflect.Method;
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import org.junit.jupiter.api.Test;
 
-public class FaultyConnection implements InvocationHandler {
-  private final Connection realConnection;
+public class TestFaultyConnection {
 
-  public FaultyConnection(Connection realConnection) {
-    this.realConnection = realConnection;
-  }
+  private static final String DERBY_URL = "jdbc:derby:memory:TestFaultyConnectionDB;create=true";
 
-  @Override
-  public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-    for (Fault fault : FaultyJDBCDriver.FAULTS.values()) {
-      if (fault.check(method)) {
-        fault.apply();
-      }
-    }
-    try {
-      return method.invoke(realConnection, args);
-    } catch (InvocationTargetException e) {
-      throw e.getCause();
+  @Test
+  void testInvokeThrowsSQLExceptionWhenMethodCallThrows() throws Throwable {
+    Method prepareMethod = Connection.class.getMethod("prepareStatement", String.class);
+    try (Connection real = DriverManager.getConnection(DERBY_URL)) {
+      FaultyConnection faultyConnection = new FaultyConnection(real);
+      assertThrows(
+          SQLException.class,
+          () ->
+              faultyConnection.invoke(
+                  null, prepareMethod, new Object[] {"SELECT * FROM missing_table"}));
     }
   }
 }

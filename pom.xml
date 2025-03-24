@@ -63,6 +63,7 @@
   </distributionManagement>
 
   <properties>
+    <derby.version>10.14.2.0</derby.version>
     <google.java.format.version>1.19.2</google.java.format.version>
     <junit.jupiter.version>5.11.2</junit.jupiter.version>
     <maven.compiler.version>3.13.0</maven.compiler.version>
@@ -96,6 +97,12 @@
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <version>${postgresql.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derby</artifactId>
+      <version>${derby.version}</version>
       <scope>test</scope>
     </dependency>
 
