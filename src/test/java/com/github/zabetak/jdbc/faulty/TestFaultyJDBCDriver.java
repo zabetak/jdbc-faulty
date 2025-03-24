@@ -16,14 +16,21 @@
 ·*/
 package com.github.zabetak.jdbc.faulty;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class TestFaultyJDBCDriver {
 
+  @BeforeEach
+  @AfterEach
+  void cleanup() {
+    FaultyJDBCDriver.clearFaults();
+  }
+
   @Test
   void testLoadFaultsFromClassPath() {
-    FaultyJDBCDriver.clearFaults();
     FaultyJDBCDriver.loadFaultsFromClasspath("jdbc-faulty-test-1.properties");
     Assertions.assertEquals(new ExceptionFault(0.5, "commit"), FaultyJDBCDriver.FAULTS.get("f1"));
     Assertions.assertEquals(

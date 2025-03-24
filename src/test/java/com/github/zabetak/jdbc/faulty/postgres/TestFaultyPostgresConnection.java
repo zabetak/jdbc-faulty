@@ -23,9 +23,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -36,6 +34,12 @@ public class TestFaultyPostgresConnection {
   @BeforeAll
   static void setup() {
     POSTGRES.start();
+  }
+
+  @BeforeEach
+  @AfterEach
+  void cleanup() {
+    FaultyJDBCDriver.clearFaults();
   }
 
   @Test
